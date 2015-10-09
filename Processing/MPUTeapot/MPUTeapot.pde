@@ -29,6 +29,8 @@ THE SOFTWARE.
 ===============================================
 */
 
+int PORT_NUMBER = 0;
+
 import processing.serial.*;
 import processing.opengl.*;
 import toxi.geom.*;
@@ -68,7 +70,7 @@ void setup() {
     println(Serial.list());
 
     // get the first available port (use EITHER this OR the specific port code below)
-    String portName = Serial.list()[7];
+    String portName = Serial.list()[PORT_NUMBER];
     
     // get a specific serial port (use EITHER this OR the first-available code above)
     //String portName = "COM4";
