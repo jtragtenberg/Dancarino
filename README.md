@@ -16,3 +16,5 @@ Para fazer o IMU rodar agora, precisa
 - descubra agora no código como ele faz isso e se estiver muito pilhado tenta implementar o mesmo código no OpenFrameWorks
 
 abração!
+
+ps. as vezes da um mal contato com o USB e precisa tirar da usb, colocar denovo e reiniciar o código do processing
