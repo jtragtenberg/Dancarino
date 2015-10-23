@@ -9,6 +9,15 @@ e pra te ajudar no descoberta de como os quaternions funcionam:
 q = <qw,qx,qy,qz> = <cos(teta/2) , x*sen(teta/2) , y*sen(teta/2) , z*sen(teta/2)>
 onde x,y,z é o eixo para onde aponta o vetor que representa o quaternion e teta é o angulo de rotação em torno desse eixo.
 tenta descobrir como retornar a partir do quaternion os valores de x,y,z e teta limpos...
+Ah! descobri!
+olha esse site aqui: http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
+brincando com uma identidade trigonométrica básia se descobre que:
+teta = 2 * acos(qw)
+x = qx / sqrt(1-qw*qw)
+y = qy / sqrt(1-qw*qw)
+z = qz / sqrt(1-qw*qw)
+
+de mão bejada pra tu! (assim fica fácil...)
 
 
 Depois de ter dominado os quaternions, pra testar o lance com os valores RAW dos sensores, tu faz o seguinte: Pega na pasta /Arduino a pasta IMUDebug. Ali tem o firmware pra mandar os dados calibrados dos sensores e na pasta libraries tem as bibliotecas que ele depende. Tu deve colocar todas as bibliotecas da pasta libraries na pasta do teu computador (X:\My Documents\Arduino\libraries\). Aí tu abre com a ide do arduino o IMUDebug.ino e upa ele pro arduino naquele esquema que eu te falei (escolhe a placa Arduino UNO em Tools>Boards e a porta serial que ele tá em Tools>Serial Port. Aí dá o Run e é só alegria (finger-crossed)
