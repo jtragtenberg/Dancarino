@@ -80,15 +80,15 @@ void serialEvent (Serial port) {
           serialCount = 0; // restart packet byte position
 
           /*
-          q[0] = (((dancarinoPacket[2] << 8) | dancarinoPacket[3]) / 16384.0f) - 1;
-           q[1] = (((dancarinoPacket[4] << 8) | dancarinoPacket[5]) / 16384.0f) - 1;
-           q[2] = (((dancarinoPacket[6] << 8) | dancarinoPacket[7]) / 16384.0f) - 1;
-           q[3] = (((dancarinoPacket[8] << 8) | dancarinoPacket[9]) / 16384.0f) - 1;
+          q[0] = (((dancarinoPacket[2] << 8) | dancarinoPacket[3]) / 16384.0f) - 1.0f;
+           q[1] = (((dancarinoPacket[4] << 8) | dancarinoPacket[5]) / 16384.0f) - 1.0f;
+           q[2] = (((dancarinoPacket[6] << 8) | dancarinoPacket[7]) / 16384.0f) - 1.0f;
+           q[3] = (((dancarinoPacket[8] << 8) | dancarinoPacket[9]) / 16384.0f) - 1.0f;
            */
-          q[0] = (dancarinoPacket[3] / 100.0f) - 1;
-          q[1] = (dancarinoPacket[5] / 100.0f) - 1;
-          q[2] = (dancarinoPacket[7] / 100.0f) - 1;
-          q[3] = (dancarinoPacket[9] / 100.0f) - 1;
+          q[0] = (dancarinoPacket[3] / 100.0f) - 1.0f;
+          q[1] = (dancarinoPacket[5] / 100.0f) - 1.0f;
+          q[2] = (dancarinoPacket[7] / 100.0f) - 1.0f;
+          q[3] = (dancarinoPacket[9] / 100.0f) - 1.0f;
 
           println(q[0] + " " + q[1] + " " + q[2] + " " + q[3]);
           startFlag = true;

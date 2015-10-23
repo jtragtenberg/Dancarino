@@ -254,3 +254,15 @@ void drawCylinder(float topRadius, float bottomRadius, float tall, int sides) {
         endShape();
     }
 }
+
+
+/*
+quaternion tem a interpretação de axis + angle
+x = qx*cos(teta/2) //qx = q[1]
+y = qy*cos(teta/2) //
+z = qz*cos(teta/2)
+teta = arccos() //qw = q[0]
+
+quaternio
+
+*/
