@@ -40,74 +40,93 @@ void loop()
   /// Update MotionerIMU
   motioner.update();
   uint8_t dancarinoPacket[12] = { 
-    '$', 0x02, 0,0 ,0,0, 0,0, 0,0, '\r', '\n'       };
+    '$', 0x02, 0,0 ,0,0, 0,0, 0,0, '\r', '\n'           };
 
   float qx = motioner.mRazorIMU.getQuatX();
   float qy = motioner.mRazorIMU.getQuatY();
   float qz = motioner.mRazorIMU.getQuatZ();
   float qw = motioner.mRazorIMU.getQuatW(); 
-  
-  
+
+
   int w = int((qw + 1)*100);
   int x = int((qx + 1)*100);
   int y = int((qy + 1)*100);
   int z = int((qz + 1)*100);
 
 
- 
-  
+  float angle = 2*acos(qw);
+  float vx = qx / (sqrt(1-qw*qw));
+  float vy = qy / (sqrt(1-qw*qw));
+  float vz = qz / (sqrt(1-qw*qw));
+
+  int angle_ = int((angle + 1)*100);
+  int vx_ = int((vx + 1)*100);
+  int vy_ = int((vy + 1)*100);
+  int vz_ = int((vz + 1)*100);
+
+
   /*
   Serial.print(qw);
-  Serial.print('|');
-  Serial.print(qx);
-  Serial.print('|');
-  Serial.print(qy);
-  Serial.print('|');  
-  Serial.println(qz);
-*/
-
- /*
+   Serial.print('|');
+   Serial.print(qx);
+   Serial.print('|');
+   Serial.print(qy);
+   Serial.print('|');  
+   Serial.println(qz);
+   */
+  /*
+  Serial.print(angle);
+   Serial.print('|');
+   Serial.print(vx);
+   Serial.print('|');
+   Serial.print(vy);
+   Serial.print('|');  
+   Serial.println(vz);
+   */
+  /*
    Serial.print(motioner.mRazorIMU.quat.w);
-  Serial.print('|');
-  Serial.print(motioner.mRazorIMU.quat.x);
-  Serial.print('|');
-  Serial.print(motioner.mRazorIMU.quat.y);
-  Serial.print('|');  
-  Serial.println(motioner.mRazorIMU.quat.z);
-*/
-/*
+   Serial.print('|');
+   Serial.print(motioner.mRazorIMU.quat.x);
+   Serial.print('|');
+   Serial.print(motioner.mRazorIMU.quat.y);
+   Serial.print('|');  
+   Serial.println(motioner.mRazorIMU.quat.z);
+   */
+  /*
   Serial.print(motioner.mRazorIMU.yaw);
-  Serial.print('|');
-  Serial.print(motioner.mRazorIMU.pitch);
-  Serial.print('|');
-  Serial.println(motioner.mRazorIMU.roll);
-*/
+   Serial.print('|');
+   Serial.print(motioner.mRazorIMU.pitch);
+   Serial.print('|');
+   Serial.println(motioner.mRazorIMU.roll);
+   */
 
-  dancarinoPacket[2] = x >> 8 & B11111111;
-  dancarinoPacket[3] = x & B11111111;
-  dancarinoPacket[4] = y >> 8 & B11111111;
-  dancarinoPacket[5] = y & B11111111;
-  dancarinoPacket[6] = z >> 8 & B11111111;
-  dancarinoPacket[7] = z & B11111111;
-  dancarinoPacket[8] = w >> 8 & B11111111;
-  dancarinoPacket[9] = w & B11111111;
+  dancarinoPacket[2] = vx_ >> 8 & B11111111;
+  dancarinoPacket[3] = vx_ & B11111111;
+  dancarinoPacket[4] = vy_ >> 8 & B11111111;
+  dancarinoPacket[5] = vy_ & B11111111;
+  dancarinoPacket[6] = vz_ >> 8 & B11111111;
+  dancarinoPacket[7] = vz_ & B11111111;
+  dancarinoPacket[8] = angle_ >> 8 & B11111111;
+  dancarinoPacket[9] = angle_ & B11111111;
 
-/*
+  /*
   int teste = 21759;
-  uint8_t testePacket[2] = {
-    0,0  };
-  testePacket[0] = teste >> 8;
-  testePacket[1] = teste & B11111111;
+   uint8_t testePacket[2] = {
+   0,0  };
+   testePacket[0] = teste >> 8;
+   testePacket[1] = teste & B11111111;
+   
+   Serial.print(testePacket[0]);
+   Serial.print('|');
+   Serial.println(testePacket[1]);
+   */
 
-  Serial.print(testePacket[0]);
-  Serial.print('|');
-  Serial.println(testePacket[1]);
-*/
+  Serial.write(dancarinoPacket, sizeof(dancarinoPacket));
 
-    Serial.write(dancarinoPacket, sizeof(dancarinoPacket));
-
-    delay(10);
+  delay(10);
 }
+
+
 
 
 

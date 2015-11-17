@@ -39,33 +39,33 @@ void draw () {
   if (startFlag) {
     /*
     line(gravity[0]*50 + 150, gravity[1]*50 + 150, gravity[2]*50 + 150, 150, 150, 150);
-    stroke(100);
-    //line(gravity[0]*50 + 150, gravity[1]*50 + 150, gravity[2]*50 + 150, 150, 150, 150);
-    text(gravity[0], 10, 50);
-    text(gravity[1], 10, 80);
-    text(gravity[2], 10, 110);
-    */
+     stroke(100);
+     //line(gravity[0]*50 + 150, gravity[1]*50 + 150, gravity[2]*50 + 150, 150, 150, 150);
+     text(gravity[0], 10, 50);
+     text(gravity[1], 10, 80);
+     text(gravity[2], 10, 110);
+     */
     pushMatrix();
     translate(150, 150, 150);
     line(vector[0]*50, vector[1]*50, vector[2]*50, 0, 0, 0);
     stroke(100);
     popMatrix();
-    
+
     //line(vector[0]*50 + 150, vector[1]*50 + 150, vector[2]*50 + 150, 150, 150, 150);
     pushMatrix();
     translate(10, 30, 0);
     text("vector:", 0, -15);
-    rect(0,-15, 50, 60);
+    rect(0, -15, 50, 60);
     text(vector[0], 0, 0);
     text(vector[1], 0, 20);
     text(vector[2], 0, 40);
     noFill();
     popMatrix();
-    
+
     pushMatrix();
     translate(10, 200, 0);
     text("quat:", 0, -15);
-    rect(0,-15, 50, 80);
+    rect(0, -15, 50, 80);
     text(q[0], 0, 0);
     text(q[1], 0, 20);
     text(q[2], 0, 40);
@@ -113,26 +113,36 @@ void serialEvent (Serial port) {
            q[2] = (((dancarinoPacket[6] << 8) | dancarinoPacket[7]) / 16384.0f) - 1.0f;
            q[3] = (((dancarinoPacket[8] << 8) | dancarinoPacket[9]) / 16384.0f) - 1.0f;
            */
+          /*
           q[0] = (dancarinoPacket[3] / 100.0f) - 1.0f;
-          q[1] = (dancarinoPacket[5] / 100.0f) - 1.0f;
-          q[2] = (dancarinoPacket[7] / 100.0f) - 1.0f;
-          q[3] = (dancarinoPacket[9] / 100.0f) - 1.0f;
-
+           q[1] = (dancarinoPacket[5] / 100.0f) - 1.0f;
+           q[2] = (dancarinoPacket[7] / 100.0f) - 1.0f;
+           q[3] = (dancarinoPacket[9] / 100.0f) - 1.0f;
+           */
+           /*
+          vector[0] = (dancarinoPacket[3] / 100.0f) - 1.0f;
+          vector[1] = (dancarinoPacket[5] / 100.0f) - 1.0f;
+          vector[2] = (dancarinoPacket[7] / 100.0f) - 1.0f;
+          angle = (dancarinoPacket[9] / 100.0f) - 1.0f;
+           */
           println(q[0] + " " + q[1] + " " + q[2] + " " + q[3]);
           startFlag = true;
 
           gravity[0] = 2 * (q[1]*q[3] - q[0]*q[2]);
           gravity[1] = 2 * (q[0]*q[1] + q[2]*q[3]);
           gravity[2] = q[0]*q[0] - q[1]*q[1] - q[2]*q[2] + q[3]*q[3];
-         
+
           ypr[0] = atan2(2*q[1]*q[2] - 2*q[0]*q[3], 2*q[0]*q[0] + 2*q[1]*q[1] - 1);
           ypr[1] = atan(gravity[0] / sqrt(gravity[1]*gravity[1] + gravity[2]*gravity[2]));
           ypr[2] = atan(gravity[1] / sqrt(gravity[0]*gravity[0] + gravity[2]*gravity[2]));
-          
+
+          /*
           angle = 2*acos(q[0]);
-          vector[0] = q[1] / (sqrt(1-q[0]*q[0]));
-          vector[1] = q[2] / (sqrt(1-q[0]*q[0]));
-          vector[2] = q[3] / (sqrt(1-q[0]*q[0]));
+           vector[0] = q[1] / (sqrt(1-q[0]*q[0]));
+           vector[1] = q[2] / (sqrt(1-q[0]*q[0]));
+           vector[2] = q[3] / (sqrt(1-q[0]*q[0]));
+           */
+
           // get quaternion from data packet
           //q[0] = ((girominPacket[2] << 8) | girominPacket[3]) / 16384.0f;
           //q[1] = ((girominPacket[4] << 8) | girominPacket[5]) / 16384.0f;
