@@ -1,8 +1,13 @@
 import processing.opengl.*;
 import processing.serial.*;
+import themidibus.*; //Import the library
+import controlP5.*;
 
 final static int SERIAL_PORT_NUM = 7;
 final static int SERIAL_PORT_BAUD_RATE = 57600;
+
+MidiBus myBus;
+ControlP5 cp5;
 
 float yaw = 0.0f;
 float pitch = 0.0f;
@@ -49,6 +54,22 @@ void setup() {
   println("HAVE A LOOK AT THE LIST ABOVE AND SET THE RIGHT SERIAL PORT NUMBER IN THE CODE!");
   println("  -> Using port " + SERIAL_PORT_NUM + ": " + portName);
   serial = new Serial(this, portName, SERIAL_PORT_BAUD_RATE);
+
+  //INICIALIZAÇÃO MIDI
+  MidiBus.list(); // List all available Midi devices on STDOUT. This will show each device's index and name.
+  //myBus = new MidiBus(this, -1, "Java Sound Synthesizer"); // Create a new MidiBus with no input device and the default Java Sound Synthesizer as the output device.
+  myBus = new MidiBus(this, 1, 3);
+  
+  initGui();
+}
+int thresholdGyro = -10000; 
+void initGui() {
+  cp5 = new ControlP5(this);
+
+  cp5.addSlider("thresholdGyro")
+    .setPosition(200, 50)
+      .setRange(-50000, 0)
+        ;
 }
 
 void setupRazor() {
@@ -83,28 +104,30 @@ float readFloat(Serial s) {
 
 color backgroundColor = color(0, 0, 0);
 long timeStampGyro;
-int maximoGyro;
-int gyroAnterior;
+boolean noteOffFlag = false;
+int duration = 100;
 
 void draw() {
   // Reset scene
   background(backgroundColor);
   lights();
-  int thresholdGyro = -10000;
+  //int thresholdGyro = -40000;
   if (gyro[2] < thresholdGyro) {
-    if (maximoGyro > gyroAnterior) {
-      maximoGyro = gyro[2];
+    if (!noteOffFlag) {
+      myBus.sendNoteOn(0, 60, 127);
+      noteOffFlag = true;
+      timeStampGyro = millis();
     }
-    timeStampGyro = millis();
-    gyroAnterior = gyro[2];
   } 
 
-
-
-  if (millis() - timeStampGyro < 1000) {
+  if (millis() - timeStampGyro < duration) {
     backgroundColor = color(255, 0, 0);
   } else {
     backgroundColor = 0;
+    if (noteOffFlag) {
+      myBus.sendNoteOff(0, 60, 0);
+      noteOffFlag = false;
+    }
   }
 
 
