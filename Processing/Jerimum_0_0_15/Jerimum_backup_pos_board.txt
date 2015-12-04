@@ -1,0 +1,130 @@
+//### Libraries
+import processing.opengl.*;
+import themidibus.*; 
+import controlP5.*;
+
+//### Global variables
+BoardModule board;
+MidiBus myBus;
+ControlP5 cp5;
+
+float yawOffset = 0.0f; // To align
+
+//### KickDetection variables
+int thresholdGyro = -10000; 
+long timeStampGyro;
+boolean noteOffFlag = false;
+int duration = 100;
+
+// Global setup
+void setup() {
+  // Setup graphics
+  size(640, 480, OPENGL);
+  smooth();
+  noStroke();
+  frameRate(50);
+
+  // Setup board communication
+  board = new BoardModule(0, 57600);
+  
+  //INICIALIZAcaoO MIDI
+  MidiBus.list(); // List all available Midi devices on STDOUT. This will show each device's index and name.
+  //myBus = new MidiBus(this, -1, "Java Sound Synthesizer"); // Create a new MidiBus with no input device and the default Java Sound Synthesizer as the output device.
+  myBus = new MidiBus(this, 1, 3);
+  
+  // GUI
+  initGui();
+}
+
+void initGui() {
+  cp5 = new ControlP5(this);
+    
+  
+  // ThresholdGyro
+  cp5.addSlider("thresholdGyro")
+    .setPosition(200, 50)
+      .setRange(-50000, 0)
+        ;
+}
+
+void keyPressed() {
+  switch (key) {
+  case 'a':  // Align screen with Razor
+    yawOffset = board.ypr[0];
+    break;
+    
+  default:
+    break;
+  }
+  
+}
+
+void draw() {
+  // Refresh the board data
+  boolean sync_data = board.RefreshData();
+  if(!sync_data) return;
+
+  color backgroundColor = color(0, 0, 0);
+  // Reset scene
+  background(backgroundColor);
+  lights();
+  
+  if (board.gyro[2] < thresholdGyro) {
+    if (!noteOffFlag) {
+      myBus.sendNoteOn(0, 60, 127);
+      noteOffFlag = true;
+      timeStampGyro = millis();
+    }
+  } 
+
+  if (millis() - timeStampGyro < duration) {
+    backgroundColor = color(255, 0, 0);
+  } else {
+    backgroundColor = 0;
+    if (noteOffFlag) {
+      myBus.sendNoteOff(0, 60, 0);
+      noteOffFlag = false;
+    }
+  }
+
+  // Output angles
+  pushMatrix();
+  translate(10, height - 40);
+  textAlign(LEFT);
+  ///YAW PITCH e ROLL
+  
+  text("Yaw: " +   int(degrees(board.ypr[0])), 0, 0);
+  text("Pitch: " + int(degrees(board.ypr[1])), 150, 0);
+  text("Roll: " +  int(degrees(board.ypr[2])), 300, 0);
+   
+
+  ///Raw Sensor Values
+  text("z: " + ((int) board.gyro[2]), 450, 30);
+  rect(550, 20, map(board.gyro[2], 0, 2000, 0, 50), 10);
+  popMatrix();
+  
+  // EULERHEAVEN
+  float x =  sin(board.ypr[0] - yawOffset)*cos(board.ypr[1]);
+  float y = -sin(board.ypr[1]);
+  float z = -cos(board.ypr[0] - yawOffset)*cos(board.ypr[1]);
+  
+  float angle = board.ypr[2];
+  
+  pushMatrix();
+  translate(width/2, height/2, -350);
+  stroke(255,128,0);
+  line(0, 0, 0, 200*x, 200*y, 200*z);
+  stroke(255,128,0);
+  popMatrix();
+  
+  pushMatrix();
+  translate(width/2, height/2, -350);
+  translate(x*200, y*200, z*200);
+  lights();
+  noStroke();
+  sphere(20);
+  popMatrix();
+  
+  // Output info text
+  text("Aponta a parada pra tela e aperta 'a' pra alinhar o real com virtual -q", 10, 25);
+}

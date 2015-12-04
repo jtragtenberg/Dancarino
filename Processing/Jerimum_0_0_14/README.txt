@@ -1,0 +1,1 @@
+alou! lembrando que tenq substituir o RazorIMU.cpp da pasta de libraries do arduino pelo que esta neste diretorio.

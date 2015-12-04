@@ -64,8 +64,8 @@ void loop()
   int vy_ = int((vy + 1)*100);
   int vz_ = int((vz + 1)*100);
 
-/*
-   Serial.print('quat:');  
+
+//   Serial.print('quat:');  
   Serial.print(qw);
    Serial.print('|');
    Serial.print(qx);
@@ -73,17 +73,18 @@ void loop()
    Serial.print(qy);
    Serial.print('|');  
    Serial.print(qz);
-  */ 
-//   Serial.print(' angle:');    
+   
+   Serial.print('|');
+Serial.print('|');   
   Serial.print(angle);
    Serial.print('|');
    Serial.print(vx);
    Serial.print('|');
    Serial.print(vy);
    Serial.print('|');  
-   Serial.print(vz);
+   Serial.println(vz);
    
-  Serial.print('||');  
+  /*
    Serial.print(motioner.mRazorIMU.quat.w);
    Serial.print('|');
    Serial.print(motioner.mRazorIMU.quat.x);
@@ -91,7 +92,7 @@ void loop()
    Serial.print(motioner.mRazorIMU.quat.y);
    Serial.print('|');  
    Serial.println(motioner.mRazorIMU.quat.z);
-   
+   */
   /*
   Serial.print(motioner.mRazorIMU.yaw);
    Serial.print('|');
