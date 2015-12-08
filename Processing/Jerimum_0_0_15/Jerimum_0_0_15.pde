@@ -275,21 +275,21 @@ void draw() {
   //text("Previa da nova nota:", 300, 300);
   stroke(0, 0, 0);
   fill(seeds.curr_color[0], seeds.curr_color[1], seeds.curr_color[2]);
-  ellipse(340, 330, 30, 30);
+  ellipse(width/2, 270, 30, 30);
   fill(255-seeds.curr_color[0], 255-seeds.curr_color[1], 255-seeds.curr_color[2]);
-  text(String.valueOf(onset.note), 335, 330);
+  text(String.valueOf(onset.note), width/2, 270);
 }
 
 //### Auxiliary functions
 void drawSeed(SeedModule seed) {
   pushMatrix();
-  translate(width/2, height/2 + 200, -350);
+  translate(width/2, height/2 + 300, -350);
   stroke(255, 255, 255);
   line(0, 0, 0, 200*seed.x, 200*seed.y, 200*seed.z);
   popMatrix();
 
   pushMatrix();
-  translate(width/2, height/2 + 200, -350);
+  translate(width/2, height/2 + 300, -350);
   translate(seed.x*200, seed.y*200, seed.z*200);
   lights();
   //noStroke();
