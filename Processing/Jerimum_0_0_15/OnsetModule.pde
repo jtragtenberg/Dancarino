@@ -13,7 +13,7 @@ public class OnsetModule implements ControlListener{
   int     note;
   
   // Kick Sensitive attributes
-  //float last_zgyro_values[] = new float[3]; // x0, x1, x2 -> where x2 is the last value retrieved, x1 the penultimate and so on;
+  //float last_gyro_values[] = new float[3]; // x0, x1, x2 -> where x2 is the last value retrieved, x1 the penultimate and so on;
   
 
   public OnsetModule(BoardModule board, SeedMgrModule seeds, MidiBus midi_bus) {
@@ -40,23 +40,27 @@ public class OnsetModule implements ControlListener{
     }
   }
   
-  public void CheckForKickSensitive() { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
+  public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max, int midi_channel) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
     // Verifies if there is a top (remember that we are getting the '-z' axis as the kick axis)
-    boolean is_top = (board.last_zgyro_values[1] > board.last_zgyro_values[0] && board.last_zgyro_values[1] > board.last_zgyro_values[2]);
+    boolean is_top = (last_gyro_values[1] > last_gyro_values[0] && last_gyro_values[1] > last_gyro_values[2]);
     
     if(is_top) {
-      if (!this.note_off_flag && board.last_zgyro_values[1] > this.kick_threshold_min) {
-        float normalized_intensity = (board.last_zgyro_values[1] - this.kick_threshold_min)/ ((this.kick_threshold_max - this.kick_threshold_min)+1);
-        int midi_intensity         = int(normalized_intensity*127);
+      if (!this.note_off_flag && last_gyro_values[1] > this.kick_threshold_min) {
+        //float normalized_intensity = (board.last_gyro_values[1] - this.kick_threshold_min)/ ((this.kick_threshold_max - this.kick_threshold_min)+1);
+        //int midi_intensity         = int(normalized_intensity*127);
+        
+        int midi_intensity = (int)map(last_gyro_values[1],this.kick_threshold_min,this.kick_threshold_max,midi_velocity_min,midi_velocity_max );
+        if (midi_intensity > 127) midi_intensity = 127;
+        if (midi_intensity < 0) midi_intensity = 0;
         
         // Search for the closest seed to get it's note
         int closest_seed_note = this.note;
         int closest_seed_idx = this.seeds.ClosestSeedIdx();
         if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
-        println("intensidade: " + board.last_zgyro_values[1]); // TODO: colocar um slider de feedback de intensidade para o usuario
-        println("intensidade (normalizada): " + normalized_intensity);
+        println("intensidade: " + last_gyro_values[1]); // TODO: colocar um slider de feedback de intensidade para o usuario
+        //println("intensidade (normalizada): " + normalized_intensity);
         println("intensidade (midi): " + midi_intensity);
-        this.midi_bus.sendNoteOn(0, closest_seed_note, midi_intensity);
+        this.midi_bus.sendNoteOn(midi_channel, closest_seed_note, midi_intensity);
         this.note_off_flag = true;
         this.time_stamp_kick = millis();
       } 
@@ -66,7 +70,7 @@ public class OnsetModule implements ControlListener{
       int closest_seed_note = this.note;
       int closest_seed_idx = this.seeds.ClosestSeedIdx();
       if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
-      this.midi_bus.sendNoteOff(0, closest_seed_note, 0);
+      this.midi_bus.sendNoteOff(midi_channel, closest_seed_note, 0);
       this.note_off_flag = false;      
     }
   }
