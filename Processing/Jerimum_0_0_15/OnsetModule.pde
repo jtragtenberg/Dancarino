@@ -40,7 +40,8 @@ public class OnsetModule implements ControlListener{
     }
   }
   
-  public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max, int midi_channel) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
+  //public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max, int midi_channel) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
+    public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
     // Verifies if there is a top (remember that we are getting the '-z' axis as the kick axis)
     boolean is_top = (last_gyro_values[1] > last_gyro_values[0] && last_gyro_values[1] > last_gyro_values[2]);
     
@@ -57,10 +58,13 @@ public class OnsetModule implements ControlListener{
         int closest_seed_note = this.note;
         int closest_seed_idx = this.seeds.ClosestSeedIdx();
         if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
+        int closest_seed_channel = seeds.getClosestChannel();
+        
         println("intensidade: " + last_gyro_values[1]); // TODO: colocar um slider de feedback de intensidade para o usuario
-        //println("intensidade (normalizada): " + normalized_intensity);
-        println("intensidade (midi): " + midi_intensity);
-        this.midi_bus.sendNoteOn(midi_channel, closest_seed_note, midi_intensity);
+        println("canal MIDI: " + closest_seed_channel);
+        println("velocity MIDI: " + midi_intensity);
+        
+        this.midi_bus.sendNoteOn(closest_seed_channel, closest_seed_note, midi_intensity);
         this.note_off_flag = true;
         this.time_stamp_kick = millis();
       } 
@@ -70,7 +74,8 @@ public class OnsetModule implements ControlListener{
       int closest_seed_note = this.note;
       int closest_seed_idx = this.seeds.ClosestSeedIdx();
       if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
-      this.midi_bus.sendNoteOff(midi_channel, closest_seed_note, 0);
+      int closest_seed_channel = seeds.getClosestChannel();
+      this.midi_bus.sendNoteOff(closest_seed_channel, closest_seed_note, 0);
       this.note_off_flag = false;      
     }
   }

@@ -4,15 +4,16 @@ public class SeedMgrModule implements ControlListener {
   int curr_color[] = new int[3];
 
   public SeedMgrModule() {
-    this.drumstick  = new SeedModule(0.0, 0.0, 0.0, -1, 255, 255, 255);
+    this.drumstick  = new SeedModule(0.0, 0.0, 0.0, -1, 0, 255, 255, 255);
     this.curr_color[0] = 255;
     this.curr_color[1] = 255;
     this.curr_color[2] = 255;
   }
 
-  public void AddSeed(int note) {  // Add a new Musical at the coords of the drumstick with note and color selected
-    this.seeds.add(new SeedModule(drumstick.x, drumstick.y, drumstick.z, note, curr_color[0], curr_color[1], curr_color[2]));
-    println("Musical Seed of note " + note + " added successful at [" +drumstick.x+", "+drumstick.y+", "+drumstick.z+"]");
+  public void AddSeed(int note, int channel) {  // Add a new Musical at the coords of the drumstick with note and color selected
+    //this.seeds.add(new SeedModule(drumstick.x, drumstick.y, drumstick.z, note, curr_color[0], curr_color[1], curr_color[2]));
+    this.seeds.add(new SeedModule(drumstick.x, drumstick.y, drumstick.z, note, channel, curr_color[0], curr_color[1], curr_color[2]));
+    println("Musical Seed of note " + note + "at channel" + channel +  " added successful at [" +drumstick.x+", "+drumstick.y+", "+drumstick.z+"]");
   }
 
   public void DeleteSeed() {  // Delete the seed more close to the drumstick
@@ -53,6 +54,16 @@ public class SeedMgrModule implements ControlListener {
       int closest_seed_idx = ClosestSeedIdx();
       int closest_seed_note = this.seeds.get(closest_seed_idx).note;
       return closest_seed_note;
+    }
+  }
+  
+  public int getClosestChannel() {
+    if (this.seeds.size() < 1) // There is no seed
+      return -1;
+    else {
+      int closest_seed_idx = ClosestSeedIdx();
+      int closest_seed_channel = this.seeds.get(closest_seed_idx).channel;
+      return closest_seed_channel;
     }
   }
 
