@@ -36,6 +36,7 @@ public class EffectPadXYModule {
 //  float inputParamButtonMax = 160;
 
   int buttonCtlNumber = 2;
+  
 
 //public void updateEffect(float inputParamX, float inputParamY, float inputParamButton) {
   public void updateEffect(float inputParamX, float inputParamY) {
@@ -52,5 +53,7 @@ public class EffectPadXYModule {
       }
     }
   }
+  
+
 }
 
