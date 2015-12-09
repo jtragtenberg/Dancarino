@@ -11,7 +11,12 @@ public class OnsetModule implements ControlListener {
   boolean note_off_flag;
   int     duration;
   int     note;
-  int     channel;
+  float   max;
+  boolean onsetFlag;
+  double  debounceTimeStamp;
+  double  debounceTime;
+  float[][] noteOffTimeStamps = new float[16][128];
+
 
   // Kick Sensitive attributes
   //float last_gyro_values[] = new float[3]; // x0, x1, x2 -> where x2 is the last value retrieved, x1 the penultimate and so on;
@@ -23,10 +28,19 @@ public class OnsetModule implements ControlListener {
     this.midi_bus = midi_bus;
     this.kick_threshold_min = 10000;
     this.kick_threshold_max = 20000;
+    this.time_stamp_kick = 0;
     this.note_off_flag = false;
     this.duration = 30;
     this.note = 1;
-    this.channel = 1;
+    this.max = 0;
+    this.onsetFlag = false;
+    this.debounceTimeStamp = 0;
+    this.debounceTime = 50;
+    for (int i=0; i<16; i++) {
+      for (int j=0; j<128; j++) { 
+        this.noteOffTimeStamps[i][j] = 0;
+      }
+    }
   }
 
   public void CheckForKick() {  // Verifies the board data and the time of last kick to decide if there is a new kick
@@ -42,10 +56,7 @@ public class OnsetModule implements ControlListener {
     }
   }
 
-  float max = 0;
-  boolean onsetFlag = false;
-  double debounceTimeStamp = 0;
-  double debounceTime = 50;
+
 
   //public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max, int midi_channel) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
   public void CheckForKickSensitive(float[] last_gyro_values, int kick_threshold_min, int kick_threshold_max, int midi_velocity_min, int midi_velocity_max) { // Verifies the board data and the time of lasts kicks to decide if there is a new kick
@@ -71,16 +82,6 @@ public class OnsetModule implements ControlListener {
       max = 0;
       onsetFlag = false;
     }
-    if (this.note_off_flag && (millis() - this.time_stamp_kick) > duration) {
-      println("noteOffFlag: " + this.note_off_flag + "TimeStampKick" + this.time_stamp_kick);
-      // Search for the closest seed to get it's note
-      int closest_seed_noteX = this.note;
-      int closest_seed_idxX = this.seeds.ClosestSeedIdx();
-      if (closest_seed_idxX >= 0) closest_seed_noteX = this.seeds.seeds.get(closest_seed_idxX).note;
-      int closest_seed_channelX = seeds.getClosestChannel();
-      this.midi_bus.sendNoteOff(closest_seed_channelX, closest_seed_noteX, 0);
-      this.note_off_flag = false;
-    }
   }
 
   public void onsetTrigger(float sensorIntensity, float intensityMin, float intensityMax, int midi_velocity_min, int midi_velocity_max) {
@@ -93,8 +94,6 @@ public class OnsetModule implements ControlListener {
     int closest_seed_idx = this.seeds.ClosestSeedIdx();
     if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
     int closest_seed_channel = seeds.getClosestChannel();
-    this.note = closest_seed_note;
-    this.channel = closest_seed_channel;
 
 
     println("intensidade: " + sensorIntensity); // TODO: colocar um slider de feedback de intensidade para o usuario
@@ -104,63 +103,86 @@ public class OnsetModule implements ControlListener {
 
     this.midi_bus.sendNoteOn(closest_seed_channel, closest_seed_note, midi_velocity);
     this.note_off_flag = true;
+    //this.noteOffTimeStamps[closest_seed_channel][closest_seed_note] = millis();
     this.time_stamp_kick = millis();
-  }
-
-
-
-  /*
-if (is_top) {
-   if (!this.note_off_flag && last_gyro_values[1] > this.kick_threshold_min) {
-   //float normalized_intensity = (board.last_gyro_values[1] - this.kick_threshold_min)/ ((this.kick_threshold_max - this.kick_threshold_min)+1);
-   //int midi_intensity         = int(normalized_intensity*127);
-   
-   int midi_intensity = (int)map(last_gyro_values[1], this.kick_threshold_min, this.kick_threshold_max, midi_velocity_min, midi_velocity_max );
-   if (midi_intensity > 127) midi_intensity = 127;
-   if (midi_intensity < 0) midi_intensity = 0;
-   
-   // Search for the closest seed to get it's note
-   int closest_seed_note = this.note;
-   int closest_seed_idx = this.seeds.ClosestSeedIdx();
-   if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
-   int closest_seed_channel = seeds.getClosestChannel();
-   
-   println("intensidade: " + last_gyro_values[1]); // TODO: colocar um slider de feedback de intensidade para o usuario
-   println("canal MIDI: " + closest_seed_channel);
-   println("velocity MIDI: " + midi_intensity);
-   
-   this.midi_bus.sendNoteOn(closest_seed_channel, closest_seed_note, midi_intensity);
-   this.note_off_flag = true;
-   this.time_stamp_kick = millis();
-   }
-   }
-   if (this.note_off_flag && (millis() - this.time_stamp_kick) > duration) {
-   // Search for the closest seed to get it's note
-   int closest_seed_note = this.note;
-   int closest_seed_idx = this.seeds.ClosestSeedIdx();
-   if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
-   int closest_seed_channel = seeds.getClosestChannel();
-   this.midi_bus.sendNoteOff(closest_seed_channel, closest_seed_note, 0);
-   this.note_off_flag = false;
-   }
-   }
-   */
-  // Listen the interface events to refresh the respective attribute
-
-  public void controlEvent(ControlEvent theEvent) {
-    if (theEvent.getName().equals("OnsetModule.kick_threshold_min")) {
-      this.kick_threshold_min = int(theEvent.getValue());
-    } else if (theEvent.getName().equals("OnsetModule.kick_threshold_max")) {
-      this.kick_threshold_max = int(theEvent.getValue());
-    } else if (theEvent.getName().equals("OnsetModule.note")) {
-      this.note = int(theEvent.getValue());
-      this.midi_bus.sendNoteOff(0, this.note, 0);
+    
+    if (this.note_off_flag && (millis() - this.time_stamp_kick) > duration) {
+      // Search for the closest seed to get it's note
+      int closest_seed_note = this.note;
+      int closest_seed_idx = this.seeds.ClosestSeedIdx();
+      if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
+      int closest_seed_channel = seeds.getClosestChannel();
+      this.midi_bus.sendNoteOff(closest_seed_channel, closest_seed_note, 0);
       this.note_off_flag = false;
-    } else if (theEvent.getName().equals("Listen")) {
-      this.midi_bus.sendNoteOn(0, this.note, 127);
-      delay(200);
-      this.midi_bus.sendNoteOff(0, this.note, 0);
     }
   }
 }
 
+public void CheckForNoteOff() {
+  double time = millis();
+  for (int i=0; i<16; i++) {
+    for (int j=0; j<128; j++) {
+      if (noteOffTimeStamps[i][j] != 0) {
+        if (time - noteOffTimeStamps[i][j] > duration) {
+          this.midi_bus.sendNoteOff(i, j, 0);
+        }
+      }
+    }
+  }
+}
+
+
+
+/*
+if (is_top) {
+ if (!this.note_off_flag && last_gyro_values[1] > this.kick_threshold_min) {
+ //float normalized_intensity = (board.last_gyro_values[1] - this.kick_threshold_min)/ ((this.kick_threshold_max - this.kick_threshold_min)+1);
+ //int midi_intensity         = int(normalized_intensity*127);
+ 
+ int midi_intensity = (int)map(last_gyro_values[1], this.kick_threshold_min, this.kick_threshold_max, midi_velocity_min, midi_velocity_max );
+ if (midi_intensity > 127) midi_intensity = 127;
+ if (midi_intensity < 0) midi_intensity = 0;
+ 
+ // Search for the closest seed to get it's note
+ int closest_seed_note = this.note;
+ int closest_seed_idx = this.seeds.ClosestSeedIdx();
+ if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
+ int closest_seed_channel = seeds.getClosestChannel();
+ 
+ println("intensidade: " + last_gyro_values[1]); // TODO: colocar um slider de feedback de intensidade para o usuario
+ println("canal MIDI: " + closest_seed_channel);
+ println("velocity MIDI: " + midi_intensity);
+ 
+ this.midi_bus.sendNoteOn(closest_seed_channel, closest_seed_note, midi_intensity);
+ this.note_off_flag = true;
+ this.time_stamp_kick = millis();
+ }
+ }
+ if (this.note_off_flag && (millis() - this.time_stamp_kick) > duration) {
+ // Search for the closest seed to get it's note
+ int closest_seed_note = this.note;
+ int closest_seed_idx = this.seeds.ClosestSeedIdx();
+ if (closest_seed_idx >= 0) closest_seed_note = this.seeds.seeds.get(closest_seed_idx).note;
+ int closest_seed_channel = seeds.getClosestChannel();
+ this.midi_bus.sendNoteOff(closest_seed_channel, closest_seed_note, 0);
+ this.note_off_flag = false;
+ }
+ }
+ */
+// Listen the interface events to refresh the respective attribute
+public void controlEvent(ControlEvent theEvent) {
+  if (theEvent.getName().equals("OnsetModule.kick_threshold_min")) {
+    this.kick_threshold_min = int(theEvent.getValue());
+  } else if (theEvent.getName().equals("OnsetModule.kick_threshold_max")) {
+    this.kick_threshold_max = int(theEvent.getValue());
+  } else if (theEvent.getName().equals("OnsetModule.note")) {
+    this.note = int(theEvent.getValue()); 
+    this.midi_bus.sendNoteOff(0, this.note, 0); 
+    this.note_off_flag = false;
+  } else if (theEvent.getName().equals("Listen")) {
+    this.midi_bus.sendNoteOn(0, this.note, 127); 
+    delay(200); 
+    this.midi_bus.sendNoteOff(0, this.note, 0);
+  }
+}
+}
