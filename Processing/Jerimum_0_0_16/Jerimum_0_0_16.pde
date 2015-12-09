@@ -54,7 +54,11 @@ void setup() {
 
   // GUI
   initGui();
+
+  loadConfig();
 }
+
+
 
 //### GUI setup
 void initGui() {
@@ -164,12 +168,79 @@ void alignLabels() {
   cp5.getController("MIDI_Channel").getCaptionLabel().align(ControlP5.LEFT, ControlP5.TOP_OUTSIDE).setPaddingX(0);
 }
 
+void loadConfig() {
+  // Restore the last saved interface values
+  cp5.loadProperties();
+  alignLabels();
+
+  // Restore the last saved seeds
+  loadSeeds("./jerimum.seeds");
+}
+
+void saveConfig() {
+  cp5.saveProperties();
+  saveSeeds("./jerimum.seeds");
+}
+
+void loadSeeds(String dir) {
+  try {
+    ObjectInputStream objectInputStream = new ObjectInputStream(
+    new FileInputStream(dir));
+    // start getting the objects out in the order in which they were written
+    seeds.seeds = (ArrayList<SeedModule>) objectInputStream.readObject();
+  } 
+  catch(Exception ex) {
+    ex.printStackTrace();
+  }
+}
+
+void saveSeeds(String dir) {
+  try {
+    // Write object with ObjectOutputStream
+    ObjectOutputStream obj_out = new
+      ObjectOutputStream (new 
+      FileOutputStream(dir));
+
+    // Write object out to disk
+    obj_out.writeObject (seeds.seeds);
+
+    // Export to temp
+    // Write object with ObjectOutputStream
+    ObjectOutputStream obj_out_temp = new
+      ObjectOutputStream (new 
+      FileOutputStream("./jerimum.seeds"));
+
+    // Write object out to disk
+    obj_out_temp.writeObject (seeds.seeds);
+  }
+  catch(Exception ex) {
+    ex.printStackTrace();
+  }
+}
+
+void exportSeeds() {
+  JFileChooser seed_file_chooser = new JFileChooser();
+  int result = seed_file_chooser.showSaveDialog(this);
+  if (result == 1) return; // Canceled    
+  String seeds_file_dir = (seed_file_chooser.getSelectedFile().getAbsolutePath() + ".seeds");
+  saveSeeds(seeds_file_dir);
+  return;
+}
+
+void importSeeds() {
+  JFileChooser seed_file_chooser = new JFileChooser();
+  int result = seed_file_chooser.showOpenDialog(this);
+  if (result == 1) return; // Canceled    
+  String seeds_file_dir = seed_file_chooser.getSelectedFile().getAbsolutePath();
+  loadSeeds(seeds_file_dir);
+}
+
 //### Keyboard callback
 void keyPressed() {
   JFileChooser seed_file_chooser = new JFileChooser();
-  seed_file_chooser.setFileFilter(new FileNameExtensionFilter("Sementes de Jerimum", "seeds", "sementes"));
+  //seed_file_chooser.setFileFilter(new FileNameExtensionFilter("Sementes de Jerimum", "seeds", "sementes"));
   JFileChooser interface_file_chooser = new JFileChooser();
-  interface_file_chooser.setFileFilter(new FileNameExtensionFilter("Valores de interface", "json", "interfaces"));
+  //interface_file_chooser.setFileFilter(new FileNameExtensionFilter("Valores de interface", "json", "interfaces"));
   String seeds_file_dir;
   int result;
 
@@ -191,38 +262,11 @@ void keyPressed() {
     break;
 
   case 'e':  // Export file of current seeds setup
-    result = seed_file_chooser.showSaveDialog(this);
-    if (result == 1) break; // Canceled    
-    seeds_file_dir = (seed_file_chooser.getSelectedFile().getAbsolutePath() + ".seeds");
-
-    try {
-      // Write object with ObjectOutputStream
-      ObjectOutputStream obj_out = new
-        ObjectOutputStream (new 
-        FileOutputStream(seeds_file_dir));
-
-      // Write object out to disk
-      obj_out.writeObject (seeds.seeds);
-    }
-    catch(Exception ex) {
-      ex.printStackTrace();
-    }
+    exportSeeds();
     break;
 
   case 'i':  // Import file to current seeds setup 
-    result = seed_file_chooser.showOpenDialog(this);
-    if (result == 1) break; // Canceled    
-    seeds_file_dir = seed_file_chooser.getSelectedFile().getAbsolutePath();
-
-    try {
-      ObjectInputStream objectInputStream = new ObjectInputStream(
-      new FileInputStream(seeds_file_dir));
-      // start getting the objects out in the order in which they were written
-      seeds.seeds = (ArrayList<SeedModule>) objectInputStream.readObject();
-    } 
-    catch(Exception ex) {
-      ex.printStackTrace();
-    }
+    importSeeds();
     break;
 
   case 'n': // Export file of current interface values
@@ -230,6 +274,7 @@ void keyPressed() {
     if (result == 1) break; // Canceled  
     seeds_file_dir = interface_file_chooser.getSelectedFile().getAbsolutePath();
     cp5.saveProperties(seeds_file_dir);
+    cp5.saveProperties();
     alignLabels();
     break;
 
@@ -241,6 +286,14 @@ void keyPressed() {
     alignLabels();
     break;
 
+  case 'v': 
+    saveConfig();
+    break;
+    
+  case 'l':
+     loadConfig();
+    break; 
+  
   default:
     break;
   }
