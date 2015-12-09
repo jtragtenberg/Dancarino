@@ -22,6 +22,7 @@ int MIDI_Velocity_Min = 10, MIDI_Velocity_Max = 120, MIDI_Channel = 2;
 int GYRO_MIN = -30000;
 int GYRO_MAX = 30000;
 
+
 float yawOffset; // To align
 
 //### Global setup
@@ -163,29 +164,31 @@ void initGui() {
           .setValue(float(MIDI_Velocity_Max))
             //.setNumberOfTickMarks(128)
             ;
-/*
-  cp5.addButton("Save")
-    .setValue(0)
-      .setPosition(630, 500)
-        .setSize(40, 30)
-          ;
-  cp5.addButton("Load")
-    .setValue(0)
-      .setPosition(680, 500)
-        .setSize(40, 30)
-          ;
 
-  cp5.addButton("Export")
-    .setValue(0)
-      .setPosition(630, 550)
-        .setSize(40, 30)
-          ;
-  cp5.addButton("Import")
-    .setValue(0)
-      .setPosition(680, 550)
-        .setSize(40, 30)
-          ;
-*/
+
+  /*
+  cp5.addButton("Save")
+   .setValue(0)
+   .setPosition(630, 500)
+   .setSize(40, 30)
+   ;
+   cp5.addButton("Load")
+   .setValue(0)
+   .setPosition(680, 500)
+   .setSize(40, 30)
+   ;
+   
+   cp5.addButton("Export")
+   .setValue(0)
+   .setPosition(630, 550)
+   .setSize(40, 30)
+   ;
+   cp5.addButton("Import")
+   .setValue(0)
+   .setPosition(680, 550)
+   .setSize(40, 30)
+   ;
+   */
 
 
   cp5.addListener(seeds);
@@ -213,24 +216,24 @@ public void Delete_Seed(int theValue) {
 }
 /*
 void Save(int theValue) {
-  saveConfig();
-  println("Configurações e sementes salvas");
-}
-void Load(int theValue) {
-  loadConfig();
-  println("Últimas Configurações e sementes carregadas");
-}
-void Export(int theValue) {
-  println("Escolha um local para salvar as sementes e os dados da interface");
-  exportSeeds();
-  exportInterface();
-}
-void Import(int theValue) {
-  println("Escolha os arquivos de sementes e dos dados da interface para abrir");
-  exportSeeds();
-  exportInterface();
-}
-*/
+ saveConfig();
+ println("Configurações e sementes salvas");
+ }
+ void Load(int theValue) {
+ loadConfig();
+ println("Últimas Configurações e sementes carregadas");
+ }
+ void Export(int theValue) {
+ println("Escolha um local para salvar as sementes e os dados da interface");
+ exportSeeds();
+ exportInterface();
+ }
+ void Import(int theValue) {
+ println("Escolha os arquivos de sementes e dos dados da interface para abrir");
+ exportSeeds();
+ exportInterface();
+ }
+ */
 
 
 void loadConfig() {
@@ -408,7 +411,7 @@ void draw() {
   int graphWindowHeight = 200;
 
   graph.drawGraph(board.last_zgyro_values[2], GYRO_MIN, GYRO_MAX, graphWindowWidth, graphWindowHeight);
-  stroke(255, 128, 0);
+  stroke(255, 160, 0);
   float thresholdLine = map(onset.kick_threshold_min, GYRO_MIN, GYRO_MAX, 0, graphWindowHeight);
   line(0, graphWindowHeight - thresholdLine, graphWindowWidth, graphWindowHeight -thresholdLine);
   float maxIntensityLine = map(onset.kick_threshold_max, GYRO_MIN, GYRO_MAX, 0, graphWindowHeight);
@@ -465,8 +468,32 @@ void draw() {
   text("OUTPUT", 0, 0);
   text("Midi Config", 0, 25);
 
+  int MIDI_Velocity_Value = onset.getVelocity();
+  
+  int barWidth = 50;
+  int barHeight = 200;
+  int barPosX = 50;
+  int barPosY = 525;
+  
+  fill(255);
+  int onsetTriggerColor = (int)map(MIDI_Velocity_Value,0,127,255,0);
 
-
+  stroke(255,onsetTriggerColor,0);
+  int barValueMin = 0;
+  int barValueMax = 127;
+  if (MIDI_Velocity_Value < barValueMin) MIDI_Velocity_Value = barValueMin;
+  if (MIDI_Velocity_Value > barValueMax) MIDI_Velocity_Value = barValueMax;
+  int barValue = int(map(MIDI_Velocity_Value, barValueMin, barValueMax, 0, barHeight));
+  rect(barPosX,barPosY,barWidth, -barValue);
+  noFill();
+  rect(barPosX,barPosY,barWidth,-barHeight);
+   
+  int barLineMin = (int)map(MIDI_Velocity_Min, barValueMin, barValueMax, 0, barHeight);
+  line(barPosX,barPosY - barLineMin, barPosX + barWidth, barPosY - barLineMin);
+  int barLineMax = (int)map(MIDI_Velocity_Max, barValueMin, barValueMax, 0, barHeight);
+  line(barPosX,barPosY - barLineMax, barPosX + barWidth, barPosY - barLineMax);
+  
+  text("MIDI trigger: " + MIDI_Velocity_Value, 50, 300);
   popMatrix();
 
 

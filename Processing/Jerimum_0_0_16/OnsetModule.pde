@@ -12,6 +12,7 @@ public class OnsetModule implements ControlListener {
   int     duration;
   int     note;
   int     channel;
+  int     midi_velocity;
 
   // Kick Sensitive attributes
   //float last_gyro_values[] = new float[3]; // x0, x1, x2 -> where x2 is the last value retrieved, x1 the penultimate and so on;
@@ -27,6 +28,7 @@ public class OnsetModule implements ControlListener {
     this.duration = 30;
     this.note = 1;
     this.channel = 1;
+    this.midi_velocity = 0;
   }
 
   public void CheckForKick() {  // Verifies the board data and the time of last kick to decide if there is a new kick
@@ -82,9 +84,13 @@ public class OnsetModule implements ControlListener {
       this.note_off_flag = false;
     }
   }
+  
+  public int getVelocity (){
+    return this.midi_velocity;
+  }
 
   public void onsetTrigger(float sensorIntensity, float intensityMin, float intensityMax, int midi_velocity_min, int midi_velocity_max) {
-    int midi_velocity = (int)map(sensorIntensity, intensityMin, intensityMax, midi_velocity_min, midi_velocity_max );
+    midi_velocity = (int)map(sensorIntensity, intensityMin, intensityMax, midi_velocity_min, midi_velocity_max );
     if (midi_velocity > 127) midi_velocity = 127;
     if (midi_velocity < 0) midi_velocity = 0;
 
@@ -101,11 +107,16 @@ public class OnsetModule implements ControlListener {
     println("canal MIDI: " + closest_seed_channel);
     println("nota MIDI: " + closest_seed_note);
     println("velocity MIDI: " + midi_velocity);
+    
+    int backgroundColor = (int)map(midi_velocity,0,127,255,0);
+    background(255,backgroundColor,0);
 
     this.midi_bus.sendNoteOn(closest_seed_channel, closest_seed_note, midi_velocity);
     this.note_off_flag = true;
     this.time_stamp_kick = millis();
   }
+  
+  
 
 
 
