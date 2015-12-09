@@ -54,7 +54,7 @@ void setup() {
 
   // GUI
   initGui();
-
+  //cp5.enableShortcuts();
   loadConfig();
 }
 
@@ -64,7 +64,9 @@ void setup() {
 void initGui() {
   cp5 = new ControlP5(this);
 
-  // ## Onset widgets
+  //cp5.addColorWheel("c", 250, 10, 200 ).setRGB(color(128, 0, 255));
+
+  // ## Onset widgets 
   // ThresholdGyroMin
   cp5.addSlider("OnsetModule.kick_threshold_min")
     .setPosition(25, 220)
@@ -93,14 +95,14 @@ void initGui() {
               ;
 
 
-  /*
-  // Listen Button
-   cp5.addButton("Listen")
-   .setValue(0)
-   .setPosition(500, 450)
-   .setSize(30, 30)
-   ;
-   */
+
+  //Listen Button
+  cp5.addButton("Listen")
+    .setValue(0)
+      .setPosition(575, 250)
+        .setSize(30, 30)
+          ;
+
   cp5.addListener(onset);
 
   // ## SeedMgr widgets
@@ -124,6 +126,18 @@ void initGui() {
         .setSize(100, 10)
           .setValue(float(seeds.curr_color[2]))
             ;
+
+  cp5.addButton("New_Seed")
+    .setValue(0)
+      .setPosition(275, 250)
+        .setSize(50, 30)
+          ;
+  cp5.addButton("Delete_Seed")
+    .setValue(0)
+      .setPosition(335, 250)
+        .setSize(60, 30)
+          ;
+
 
 
   cp5.addSlider("MIDI_Channel")
@@ -149,6 +163,29 @@ void initGui() {
           .setValue(float(MIDI_Velocity_Max))
             //.setNumberOfTickMarks(128)
             ;
+/*
+  cp5.addButton("Save")
+    .setValue(0)
+      .setPosition(630, 500)
+        .setSize(40, 30)
+          ;
+  cp5.addButton("Load")
+    .setValue(0)
+      .setPosition(680, 500)
+        .setSize(40, 30)
+          ;
+
+  cp5.addButton("Export")
+    .setValue(0)
+      .setPosition(630, 550)
+        .setSize(40, 30)
+          ;
+  cp5.addButton("Import")
+    .setValue(0)
+      .setPosition(680, 550)
+        .setSize(40, 30)
+          ;
+*/
 
 
   cp5.addListener(seeds);
@@ -168,18 +205,48 @@ void alignLabels() {
   cp5.getController("MIDI_Channel").getCaptionLabel().align(ControlP5.LEFT, ControlP5.TOP_OUTSIDE).setPaddingX(0);
 }
 
+public void New_Seed(int theValue) {
+  seeds.AddSeed(onset.note, MIDI_Channel);
+}
+public void Delete_Seed(int theValue) {
+  seeds.DeleteSeed();
+}
+/*
+void Save(int theValue) {
+  saveConfig();
+  println("Configurações e sementes salvas");
+}
+void Load(int theValue) {
+  loadConfig();
+  println("Últimas Configurações e sementes carregadas");
+}
+void Export(int theValue) {
+  println("Escolha um local para salvar as sementes e os dados da interface");
+  exportSeeds();
+  exportInterface();
+}
+void Import(int theValue) {
+  println("Escolha os arquivos de sementes e dos dados da interface para abrir");
+  exportSeeds();
+  exportInterface();
+}
+*/
+
+
 void loadConfig() {
   // Restore the last saved interface values
   cp5.loadProperties();
+  //cp5.loadLayout("jerimum.sem");
   alignLabels();
 
   // Restore the last saved seeds
-  loadSeeds("./jerimum.seeds");
+  loadSeeds("jerimum.seeds");
 }
 
 void saveConfig() {
   cp5.saveProperties();
-  saveSeeds("./jerimum.seeds");
+  //cp5.saveLayout("jerimum.sem");
+  saveSeeds("jerimum.seeds");
 }
 
 void loadSeeds(String dir) {
@@ -208,7 +275,7 @@ void saveSeeds(String dir) {
     // Write object with ObjectOutputStream
     ObjectOutputStream obj_out_temp = new
       ObjectOutputStream (new 
-      FileOutputStream("./jerimum.seeds"));
+      FileOutputStream("jerimum.seeds"));
 
     // Write object out to disk
     obj_out_temp.writeObject (seeds.seeds);
@@ -235,21 +302,46 @@ void importSeeds() {
   loadSeeds(seeds_file_dir);
 }
 
-//### Keyboard callback
-void keyPressed() {
-  JFileChooser seed_file_chooser = new JFileChooser();
-  //seed_file_chooser.setFileFilter(new FileNameExtensionFilter("Sementes de Jerimum", "seeds", "sementes"));
+void exportInterface() {
   JFileChooser interface_file_chooser = new JFileChooser();
   //interface_file_chooser.setFileFilter(new FileNameExtensionFilter("Valores de interface", "json", "interfaces"));
   String seeds_file_dir;
   int result;
+  result = interface_file_chooser.showSaveDialog(this);
+  if (result == 1) return; // Canceled  
+  seeds_file_dir = interface_file_chooser.getSelectedFile().getAbsolutePath();
+  cp5.saveProperties(seeds_file_dir);
+  cp5.saveProperties();
+  alignLabels();
+  return;
+}
+
+void importInterface() {
+  JFileChooser interface_file_chooser = new JFileChooser();
+  //interface_file_chooser.setFileFilter(new FileNameExtensionFilter("Valores de interface", "json", "interfaces"));
+  String seeds_file_dir;
+  int result;
+  result = interface_file_chooser.showOpenDialog(this);
+  if (result == 1) return; // Canceled  
+  seeds_file_dir = interface_file_chooser.getSelectedFile().getAbsolutePath();
+  cp5.loadProperties(seeds_file_dir);
+  alignLabels();
+  return;
+}
+
+//### Keyboard callback
+void keyPressed() {
 
   switch (key) {
   case 'a':  // Align screen with Razor
     yawOffset = board.ypr[0];
     break;
 
-  case 's':  // Create a new musical seed
+  case ENTER:  // Align screen with Razor
+    yawOffset = board.ypr[0];
+    break;
+
+  case ' ':  // Create a new musical seed
     seeds.AddSeed(onset.note, MIDI_Channel);
     onset.note = onset.note + 1;
     break;
@@ -263,37 +355,24 @@ void keyPressed() {
 
   case 'e':  // Export file of current seeds setup
     exportSeeds();
+    exportInterface();
     break;
 
   case 'i':  // Import file to current seeds setup 
     importSeeds();
+    importInterface();
     break;
 
-  case 'n': // Export file of current interface values
-    result = interface_file_chooser.showSaveDialog(this);
-    if (result == 1) break; // Canceled  
-    seeds_file_dir = interface_file_chooser.getSelectedFile().getAbsolutePath();
-    cp5.saveProperties(seeds_file_dir);
-    cp5.saveProperties();
-    alignLabels();
-    break;
-
-  case 'm':  // Import file to current interface values
-    result = interface_file_chooser.showOpenDialog(this);
-    if (result == 1) break; // Canceled  
-    seeds_file_dir = interface_file_chooser.getSelectedFile().getAbsolutePath();
-    cp5.loadProperties(seeds_file_dir);
-    alignLabels();
-    break;
-
-  case 'v': 
+  case 's': 
     saveConfig();
+    println("Configuracao Salva");
     break;
-    
+
   case 'l':
-     loadConfig();
+    loadConfig();
+    println("Configuracao Carregada");
     break; 
-  
+
   default:
     break;
   }
@@ -325,7 +404,7 @@ void draw() {
   //GRAPH
   pushMatrix();
   translate(0, 400);
-  int graphWindowWidth = 250;
+  int graphWindowWidth = 220;
   int graphWindowHeight = 200;
 
   graph.drawGraph(board.last_zgyro_values[2], GYRO_MIN, GYRO_MAX, graphWindowWidth, graphWindowHeight);
@@ -373,7 +452,7 @@ void draw() {
   translate(275, 75);
   fill(255);
   text("SEED", 0, 0);
-  text("Aperte 's' pra inserir semente e 'x' para excluir", 0, 25);
+  text("Aperte barra de espaço pra inserir semente e 'x' para excluir", 0, 25);
 
 
   popMatrix();
@@ -385,6 +464,8 @@ void draw() {
   fill(255);
   text("OUTPUT", 0, 0);
   text("Midi Config", 0, 25);
+
+
 
   popMatrix();
 
@@ -414,16 +495,17 @@ void draw() {
   //text("Previa da nova nota:", 300, 300);
   stroke(0, 0, 0);
   fill(seeds.curr_color[0], seeds.curr_color[1], seeds.curr_color[2]);
-  ellipse(width/2, 270, 30, 30);
+  ellipse(width/2, 320, 30, 30);
   fill(255-seeds.curr_color[0], 255-seeds.curr_color[1], 255-seeds.curr_color[2]);
-  text(String.valueOf(onset.note), width/2, 270);
+  text(String.valueOf(onset.note), width/2 - 5, 320);
 }
 
 //### Auxiliary functions
 void drawSeed(SeedModule seed) {
   pushMatrix();
   translate(width/2, height/2 + 300, -350);
-  stroke(255, 255, 255);
+  //stroke(255, 255, 255);
+  stroke(seed.colors[0], seed.colors[1], seed.colors[2]);
   line(0, 0, 0, 200*seed.x, 200*seed.y, 200*seed.z);
   popMatrix();
 

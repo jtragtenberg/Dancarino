@@ -147,6 +147,7 @@ if (is_top) {
    */
   // Listen the interface events to refresh the respective attribute
 
+  
   public void controlEvent(ControlEvent theEvent) {
     if (theEvent.getName().equals("OnsetModule.kick_threshold_min")) {
       this.kick_threshold_min = int(theEvent.getValue());
@@ -156,10 +157,14 @@ if (is_top) {
       this.note = int(theEvent.getValue());
       this.midi_bus.sendNoteOff(0, this.note, 0);
       this.note_off_flag = false;
-    } else if (theEvent.getName().equals("Listen")) {
-      this.midi_bus.sendNoteOn(0, this.note, 127);
-      delay(200);
-      this.midi_bus.sendNoteOff(0, this.note, 0);
+    } 
+    else if (theEvent.getName().equals("MIDI_Channel")) {
+      this.channel = int(theEvent.getValue()) - 1;
+    }
+    else if (theEvent.getName().equals("Listen")) {
+      this.midi_bus.sendNoteOn(this.channel, this.note, 127);
+      delay(20);
+      this.midi_bus.sendNoteOff(this.channel, this.note, 0);
     }
   }
 }
