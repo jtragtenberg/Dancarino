@@ -13,7 +13,7 @@ BoardModule   board;
 OnsetModule   onset;
 SeedMgrModule seeds;
 EffectModule effects;
-EffectPadXYModule giroMouse;
+//EffectPadXYModule giroMouse;
 Graph graph;
 
 MidiBus myBus;
@@ -49,9 +49,9 @@ void setup() {
   onset = new OnsetModule(board, seeds, myBus);
 
   // Setup EffectsModule
-  giroMouse = new EffectPadXYModule();
-  effects = new EffectModule(giroMouse, board, yawOffset);
-  
+  //giroMouse = new EffectPadXYModule();
+  //effects = new EffectModule(giroMouse, board, yawOffset);
+  effects = new EffectModule(board, yawOffset);
 
   //Setup Graph
   graph = new Graph();

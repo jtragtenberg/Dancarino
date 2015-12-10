@@ -18,8 +18,9 @@ public class EffectModule {
 
   float yawOffset;
 
-  public EffectModule(EffectPadXYModule giroMouse, BoardModule board, float yawOffset) {
-    this.giroMouse = giroMouse;
+  //public EffectModule(EffectPadXYModule giroMouse, BoardModule board, float yawOffset) {
+  public EffectModule(BoardModule board, float yawOffset) {
+    this.giroMouse = new EffectPadXYModule();
     this.board = board;
     this.yawOffset = yawOffset;
   }
