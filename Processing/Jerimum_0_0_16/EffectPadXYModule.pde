@@ -40,7 +40,7 @@ public class EffectPadXYModule {
 
   //public void updateEffect(float inputParamX, float inputParamY, float inputParamButton) {
   public void updateEffect(float inputParamX, float inputParamY) {
-    if (board.buttonPressed) {
+   // if (board.buttonPressed) {
       if (millis() - timeRef > updateRate) {
         xValue = (int)map(inputParamX, inputParamXMin, inputParamXMax, outputParamXMin, outputParamXMax);
         yValue = (int)map(inputParamY, inputParamYMin, inputParamYMax, outputParamYMin, outputParamYMax);
@@ -50,7 +50,7 @@ public class EffectPadXYModule {
         //myBus.sendControllerChange(channel, buttonCtlNumber, buttonValue); // Send a controllerChange
         timeRef = millis();
       }
-    }
+    //}
   }
 }
 

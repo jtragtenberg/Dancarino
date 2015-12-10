@@ -13,6 +13,7 @@ BoardModule   board;
 OnsetModule   onset;
 SeedMgrModule seeds;
 EffectModule effects;
+EffectPadXYModule giroMouse;
 Graph graph;
 
 MidiBus myBus;
@@ -48,7 +49,9 @@ void setup() {
   onset = new OnsetModule(board, seeds, myBus);
 
   // Setup EffectsModule
-  effects = new EffectModule();
+  giroMouse = new EffectPadXYModule();
+  effects = new EffectModule(giroMouse, board, yawOffset);
+  
 
   //Setup Graph
   graph = new Graph();
@@ -381,6 +384,8 @@ void keyPressed() {
   }
 }
 
+
+
 //### Draw callback (every frame)
 void draw() {
   background(0);
@@ -396,7 +401,9 @@ void draw() {
   // onset.CheckForKick();
   onset.CheckForKickSensitive(board.last_zgyro_values, onset.kick_threshold_min, onset.kick_threshold_max, MIDI_Velocity_Min, MIDI_Velocity_Max);
   //onset.CheckForNoteOff();
+
   //roll (-80,160) pitch (-50,50)
+  
   effects.inputParamMin = -80;
   effects.inputParamMax = 160;
 
