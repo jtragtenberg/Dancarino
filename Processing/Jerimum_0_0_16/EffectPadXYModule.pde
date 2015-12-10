@@ -28,26 +28,28 @@ public class EffectPadXYModule {
   int yCtlNumber = 1;
 
   //Button
-  int buttonValue = 0;
-  int outputParamButtonMin = 0;
-  int outputParamButtonMax = 127;
-
-  float inputParamButtonMin = -80;
-  float inputParamButtonMax = 160;
+  //  int buttonValue = 0;
+  //  int outputParamButtonMin = 0;
+  //  int outputParamButtonMax = 127;
+  //
+  //  float inputParamButtonMin = -80;
+  //  float inputParamButtonMax = 160;
 
   int buttonCtlNumber = 2;
 
 
-  public void updateEffect(float inputParamX, float inputParamY, float inputParamButton) {
-    if (millis() - timeRef > updateRate) {
-      xValue = (int)map(inputParamX, inputParamXMin, inputParamXMax, outputParamXMin, outputParamXMax);
-      yValue = (int)map(inputParamY, inputParamYMin, inputParamYMax, outputParamYMin, outputParamYMax);
-      buttonValue = (int)map(inputParamButton, inputParamButtonMin, inputParamButtonMax, outputParamButtonMin, outputParamButtonMax);
-      myBus.sendControllerChange(channel, xCtlNumber, xValue); // Send a controllerChange
-      myBus.sendControllerChange(channel, yCtlNumber, yValue); // Send a controllerChange
-      myBus.sendControllerChange(channel, buttonCtlNumber, buttonValue); // Send a controllerChange
-
+  //public void updateEffect(float inputParamX, float inputParamY, float inputParamButton) {
+  public void updateEffect(float inputParamX, float inputParamY) {
+    if (board.buttonPressed) {
+      if (millis() - timeRef > updateRate) {
+        xValue = (int)map(inputParamX, inputParamXMin, inputParamXMax, outputParamXMin, outputParamXMax);
+        yValue = (int)map(inputParamY, inputParamYMin, inputParamYMax, outputParamYMin, outputParamYMax);
+        //buttonValue = (int)map(inputParamButton, inputParamButtonMin, inputParamButtonMax, outputParamButtonMin, outputParamButtonMax);
+        myBus.sendControllerChange(channel, xCtlNumber, xValue); // Send a controllerChange
+        myBus.sendControllerChange(channel, yCtlNumber, yValue); // Send a controllerChange
+        //myBus.sendControllerChange(channel, buttonCtlNumber, buttonValue); // Send a controllerChange
         timeRef = millis();
+      }
     }
   }
 }
