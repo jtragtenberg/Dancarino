@@ -1,4 +1,4 @@
-# Dancarino
+# Jerimum
 open source IMU
 
 23/10/2015
